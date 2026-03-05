@@ -1,6 +1,6 @@
 # src/priority_vector.py
 """
-PriorityVector: Grounded, constrained emphasis weights for thematic control.
+PriorityVector: Grounded, constrained thematic emphasis weights.
 
 Derived from detected theme confidences and clamped against textual evidence.
 Prevents hallucination by rejecting or limiting unsupported themes.
@@ -12,19 +12,20 @@ import copy
 
 class PriorityVector:
     """
-    Manages thematic emphasis weights that are tied to detected text evidence.
+    Manages thematic emphasis weights tied to detected text evidence.
     
-    - Defaults are generated from theme confidence scores.
+    - Defaults are generated proportional to theme confidence scores.
     - Nudges are allowed only on supported themes and within safe bounds.
     - Ensures all variation remains text-grounded.
     """
     
     def __init__(self, theme_confidences: Dict[str, float]):
         """
-        Initialize with detected theme confidences.
+        Initialize with detected theme confidences from text analysis.
         
         Args:
             theme_confidences: Dict[theme_name: confidence_score (0.0–1.0)]
+                               Example: {'sacrifice': 0.92, 'irony': 0.88, 'poverty': 0.65}
         """
         if not theme_confidences:
             raise ValueError("Theme confidences cannot be empty")
@@ -33,7 +34,7 @@ class PriorityVector:
         self.default_vector = self._normalize(self._compute_default())
         self.current_vector: Optional[Dict[str, float]] = None
         self.supported_themes = set(theme_confidences.keys())
-        
+    
     def _compute_default(self) -> Dict[str, float]:
         """Generate initial vector proportional to confidence scores."""
         total_conf = sum(self.theme_confidences.values())
@@ -50,7 +51,7 @@ class PriorityVector:
     
     def apply_nudge(self, nudge: Dict[str, float], max_delta: float = 0.3, max_multiplier: float = 2.0) -> Dict[str, float]:
         """
-        Apply a user/agent nudge to the default vector with safety clamps.
+        Apply user/agent nudge to the default vector with safety clamps.
         
         Args:
             nudge: Dict[theme: delta_value] — adjustments to apply
@@ -64,7 +65,8 @@ class PriorityVector:
         
         for theme, delta in nudge.items():
             if theme not in self.supported_themes:
-                continue  # silently ignore unsupported (or log warning in prod)
+                # Silently ignore unsupported themes (or log in production)
+                continue
                 
             original_weight = self.default_vector.get(theme, 0.0)
             max_allowed = min(
@@ -92,3 +94,25 @@ class PriorityVector:
     
     def __repr__(self) -> str:
         return f"PriorityVector(default={self.default_vector}, current={self.current_vector})"
+
+
+# Quick example usage (for manual testing / README)
+if __name__ == "__main__":
+    # Simulate detected themes from text analysis
+    example_confidences = {
+        "sacrifice": 0.92,
+        "irony": 0.88,
+        "poverty": 0.65,
+        "biblical_allusion": 0.80
+    }
+    
+    pv = PriorityVector(example_confidences)
+    print("Default vector:", pv.get_vector())
+    
+    # Nudge toward poverty lens
+    nudged = pv.apply_nudge({"poverty": 0.52})
+    print("After nudge:", nudged)
+    
+    # Try an unsupported theme (should be ignored)
+    pv.apply_nudge({"cyberpunk_dystopia": 0.9})
+    print("After invalid nudge (ignored):", pv.get_vector())
