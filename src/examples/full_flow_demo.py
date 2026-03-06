@@ -25,54 +25,56 @@ except Exception as e:
     print("Import failed:", str(e))
 
 def run_test():
-    print("=== Full Flow Test Started ===\n")
-print("All imports succeeded. Starting run_test()...")
-try:
-    run_test()
-except Exception as e:
-    print("run_test() failed with:", type(e).__name__, str(e))
-    import traceback
-    traceback.print_exc()
-
+    print("Inside run_test() — starting now")
+    
     sample_text = """
     Della cried nearly all day, and into the night. She had only $1.87 to buy Jim a gift.
     Her hair was her pride, but she sold it for twenty dollars to buy a chain for his watch.
     When Jim came home, he stared at her short hair. His gift was combs for her long hair.
     They had sacrificed their treasures for each other.
     """
+    print("Sample text loaded")
 
+    print("Creating ThemeAnalysisTool...")
     tool = ThemeAnalysisTool()
+    print("Tool created OK")
+
+    print("Running analyze()...")
     themes = tool.analyze(sample_text)
-    print("Detected Themes & Confidences:")
+    print("Themes detected:")
     print(themes)
-    print("\nTop Motifs:")
-    print(tool.get_key_motifs(sample_text))
-    print("\n")
+    print("")
 
+    print("Creating PriorityVector...")
     pv = PriorityVector(themes)
-    print("Default Priority Vector:")
-    print(pv.get_vector())
-    print("\n")
+    print("Vector created OK")
 
+    print("Applying nudge...")
     nudge = {"poverty": 0.52}
     nudged_vector = pv.apply_nudge(nudge)
     print(f"After nudge {nudge}:")
     print(nudged_vector)
-    print("\n")
+    print("")
 
+    print("Creating SpiralRefinement...")
     refiner = SpiralRefinement()
+    print("Refiner created OK")
+
+    print("Running refine()...")
     refined, metrics = refiner.refine(sample_text, nudged_vector)
     print("Refined Text:")
     print(refined)
-    print("\nMetrics:")
+    print("")
+    print("Metrics:")
     print(metrics)
-    print("\n")
+    print("")
 
+    print("Preparing output for stamp...")
     output = {
         "refined_text": refined,
         "metrics": metrics,
         "priority_vector": nudged_vector,
-        "themes": themes  # add for completeness
+        "themes": themes
     }
     stamper = ProvenanceStamp()
     stamped = stamper.stamp_output(output)
@@ -81,10 +83,13 @@ except Exception as e:
     print("\n")
 
     # NEW: Log the analysis
+    print("Creating logger...")
     logger = AnalysisLogger()
+    print("Logger created OK")
+
     logger.log_analysis(
         input_text=sample_text,
-        output=stamped,  # use stamped output
+        output=stamped,
         connections=["Magi sacrifice baseline", "poverty nudge test"],
         notes="Full flow demo run with upgraded theme detection and poverty emphasis"
     )
