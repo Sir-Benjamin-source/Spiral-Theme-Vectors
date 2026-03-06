@@ -21,23 +21,10 @@ This module enables **controlled novelty**:
 
 All variation stays within textual evidence (replicated word chains, motif validity, generality probability pools). No hallucinated themes or unsupported lenses.
 
-## Quick Example
+## Examples & Demos
 
-```python
-from spiral_theme_vectors import ThemeAnalysisTool
+Run these from the repo root to see the full flow in action:
 
-tool = ThemeAnalysisTool(genre_generalities=..., author_profiles=...)
-analysis = tool.analyze(full_text_of_gift_of_magi)
-
-# Default vector: {'sacrifice': 0.42, 'irony': 0.31, ...}
-
-# Nudge toward poverty lens
-nudged_vector = tool.apply_user_nudge({"poverty": +0.52})
-
-refined_summary = tool.refine_text(
-    text=original_text,
-    priority_vector=nudged_vector
-)
-
-print(refined_summary)
-# → Darker, critical tone emphasizing systemic cruelty, validity 87%
+- Literary (Magi story):
+  ```bash
+  python examples/full_flow_demo.py
