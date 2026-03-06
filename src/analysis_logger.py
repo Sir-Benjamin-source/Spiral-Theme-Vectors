@@ -5,6 +5,7 @@ AnalysisLogger: Records summaries, analyses, and refinements to JSON log.
 Enables the repo to accumulate examples for future reference, connections, and extension.
 """
 
+from doctest import OutputChecker
 from typing import Dict, Any, Optional
 import json
 import os
@@ -72,31 +73,30 @@ class AnalysisLogger:
             logs = json.load(f)
         return [entry for entry in logs if query.lower() in entry["input_snippet"].lower() or query.lower() in entry["notes"].lower()]
 
-
-# Quick manual test block
+# Quick manual test block (self-contained — no external variables needed)
 if __name__ == "__main__":
     logger = AnalysisLogger()
     
-    # Sample log entry
+    # Define sample data right here
+    sample_input = "Della cried nearly all day, and into the night. She had only $1.87 to buy Jim a gift..."
+    
     sample_output = {
         "themes": {"sacrifice": 0.693},
         "vector": {"sacrifice": 0.26},
-        "refined_text": "Sample refined text...",
-        "metrics": {"creativity": 84},
+        "refined_text": "Sample refined text with thematic emphasis...",
+        "metrics": {"creativity": 84, "engagement": 90},
         "stamp": "v1.0#example-hash"
     }
     
     logger.log_analysis(
-        input_text="Della cried nearly all day...",
+        input_text=sample_input,
         output=sample_output,
-        connections=["Magi poverty lens"],
-        notes="Test log with connections"
+        connections=["Magi poverty lens", "sacrifice baseline"],
+        notes="Test log entry with connections and notes"
     )
     
-    recent = logger.get_logs(limit=1)
     print("Recent log entry:")
-    print(recent)
+    print(logger.get_logs(limit=1))
     
-    searched = logger.search_logs("poverty")
     print("\nSearched for 'poverty':")
-    print(searched)
+    print(logger.search_logs("poverty"))
