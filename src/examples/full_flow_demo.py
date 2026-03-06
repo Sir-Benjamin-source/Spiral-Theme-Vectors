@@ -16,6 +16,14 @@ from priority_vector import PriorityVector
 from spiral_integration import SpiralRefinement
 from provenance import ProvenanceStamp
 from analysis_logger import AnalysisLogger 
+
+print("Attempting imports...")
+try:
+    from theme_analysis import ThemeAnalysisTool
+    print("ThemeAnalysisTool imported OK")
+except Exception as e:
+    print("Import failed:", str(e))
+
 def run_test():
     print("=== Full Flow Test Started ===\n")
 
