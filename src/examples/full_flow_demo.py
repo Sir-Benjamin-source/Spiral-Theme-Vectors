@@ -26,6 +26,13 @@ except Exception as e:
 
 def run_test():
     print("=== Full Flow Test Started ===\n")
+print("All imports succeeded. Starting run_test()...")
+try:
+    run_test()
+except Exception as e:
+    print("run_test() failed with:", type(e).__name__, str(e))
+    import traceback
+    traceback.print_exc()
 
     sample_text = """
     Della cried nearly all day, and into the night. She had only $1.87 to buy Jim a gift.
