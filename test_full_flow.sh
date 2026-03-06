@@ -1,24 +1,9 @@
-#!/usr/bin/env bash
-set -euo pipefail
-
-echo "========================================"
-echo "  Spiral-Theme-Vectors Full Flow Test  "
-echo "========================================"
-echo ""
-
-# 1. Ensure we're in the repo root
-cd "$(dirname "$0")" || exit 1
-
-# 2. Activate Python environment if needed (Codespace usually has python3 ready)
-PYTHON=python3
-
-# 3. Create a temporary test script that runs the full flow
-cat > /tmp/test_flow.py << 'EOF'
+# test_flow.py (run from repo root)
 import sys
 import os
 
-# Add src/ to path
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), 'src')))
+# Ensure src/ is on path (from repo root)
+sys.path.insert(0, os.path.abspath('src'))
 
 from theme_analysis import ThemeAnalysisTool
 from priority_vector import PriorityVector
@@ -74,23 +59,11 @@ def run_test():
     }
     stamper = ProvenanceStamp()
     stamped = stamper.stamp_output(output)
-    print("Stamped Output (excerpt):")
+    print("Final Stamped Output (excerpt):")
     print(stamped)
 
-    print("\n=== Test Completed Successfully ===")
+    print("\n=== Test Completed ===")
 
 
 if __name__ == "__main__":
     run_test()
-EOF
-
-# 4. Run the test
-echo "Running full flow test..."
-$PYTHON /tmp/test_flow.py
-
-# 5. Clean up
-rm -f /tmp/test_flow.py
-
-echo ""
-echo "Test finished. Check output above for any errors or unexpected behavior."
-echo "If all steps printed without tracebacks → we're golden."
