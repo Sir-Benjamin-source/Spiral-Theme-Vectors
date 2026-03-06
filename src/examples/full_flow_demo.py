@@ -8,11 +8,11 @@ REPO_ROOT = '/workspaces/Spiral-Theme-Vectors'
 sys.path.insert(0, os.path.join(REPO_ROOT, 'src'))
 
 # Now imports
+from analysis_logger import AnalysisLogger
 from theme_analysis import ThemeAnalysisTool
 from priority_vector import PriorityVector
 from spiral_integration import SpiralRefinement
 from provenance import ProvenanceStamp
-
 def run_test():
     print("=== Full Flow Test Started ===\n")
 
@@ -27,7 +27,7 @@ def run_test():
     themes = tool.analyze(sample_text)
     print("Detected Themes & Confidences:")
     print(themes)
-    print("\nTop Motifs (for debugging):")
+    print("\nTop Motifs:")
     print(tool.get_key_motifs(sample_text))
     print("\n")
 
@@ -37,13 +37,13 @@ def run_test():
     print("\n")
 
     nudge = {"poverty": 0.52}
-    nudged = pv.apply_nudge(nudge)
+    nudged_vector = pv.apply_nudge(nudge)
     print(f"After nudge {nudge}:")
-    print(nudged)
+    print(nudged_vector)
     print("\n")
 
     refiner = SpiralRefinement()
-    refined, metrics = refiner.refine(sample_text, nudged)
+    refined, metrics = refiner.refine(sample_text, nudged_vector)
     print("Refined Text:")
     print(refined)
     print("\nMetrics:")
@@ -53,15 +53,24 @@ def run_test():
     output = {
         "refined_text": refined,
         "metrics": metrics,
-        "priority_vector": nudged
+        "priority_vector": nudged_vector,
+        "themes": themes  # add for completeness
     }
     stamper = ProvenanceStamp()
     stamped = stamper.stamp_output(output)
     print("Stamped Output (excerpt):")
     print(stamped)
+    print("\n")
 
+    # NEW: Log the analysis
+    logger = AnalysisLogger()
+    logger.log_analysis(
+        input_text=sample_text,
+        output=stamped,  # use stamped output
+        connections=["Magi sacrifice baseline", "poverty nudge test"],
+        notes="Full flow demo run with upgraded theme detection and poverty emphasis"
+    )
+    print("Logged to data/logs/analyses.json")
+    print("Recent logs (last 2):")
+    print(logger.get_logs(limit=2))
     print("\n=== Test Completed ===")
-
-
-if __name__ == "__main__":
-    run_test()
