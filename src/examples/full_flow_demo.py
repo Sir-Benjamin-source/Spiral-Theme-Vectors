@@ -1,5 +1,19 @@
-# ... existing imports ...
+# examples/full_flow_demo.py (updated path handling)
 
+import sys
+import os
+
+# Get repo root (works whether run from root or examples/)
+REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+sys.path.insert(0, os.path.join(REPO_ROOT, 'src'))
+
+# Now imports should work
+from theme_analysis import ThemeAnalysisTool
+from priority_vector import PriorityVector
+from spiral_integration import SpiralRefinement
+from provenance import ProvenanceStamp
+
+# ... rest of your script unchanged ...
 def run_test():
     print("=== Full Flow Test Started ===\n")
 
