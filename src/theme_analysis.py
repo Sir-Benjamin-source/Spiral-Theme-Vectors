@@ -1,109 +1,89 @@
-# src/theme_analysis.py
+# src/theme_analysis.py (updated with real-ish auditors)
 """
 ThemeAnalysisTool: Detects themes with confidence scores from input text.
 
-Uses generality checks (replicated chains, motif validity) and literary pattern matching
-to produce a confidence-weighted theme dictionary that feeds PriorityVector.
+Uses simple but real generality (chain replication via n-grams) and literary pattern matching.
 """
 
 from typing import Dict, List, Tuple
 import re
-from collections import Counter
+from collections import Counter, defaultdict
 
-# Placeholder for future integration with Spiral-Path auditors
-# In real impl, replace with actual imports from Spiral-Path
-class MockGeneralityAuditor:
+class GeneralityAuditor:
+    """Real-ish: scores motif replication using bigram/trigram overlap."""
     def score_chain_replication(self, text: str, motif: str) -> float:
-        """Mock: returns probability of motif replication (0.0–1.0)"""
-        # In production: use real auditor logic (e.g., ControversySniffer, chain matching)
-        count = len(re.findall(re.escape(motif), text.lower()))
-        return min(1.0, count / max(1, len(text.split()) / 50))  # simple heuristic
+        if not motif:
+            return 0.0
+        lower_text = text.lower()
+        words = re.findall(r'\b\w+\b', lower_text)
+        if len(words) < 5:
+            return 0.0
+        
+        # Build bigrams
+        bigrams = [f"{words[i]} {words[i+1]}" for i in range(len(words)-1)]
+        motif_bigrams = [f"{motif.lower()} {motif.lower()}", motif.lower()]  # simple motif variants
+        
+        count = sum(1 for bg in bigrams if any(m in bg for m in motif_bigrams))
+        return min(1.0, count / max(1, len(bigrams) / 10))  # normalize
 
-class MockLiteraryAuditor:
-    def detect_themes(self, text: str) -> List[Tuple[str, float]]:
-        """Mock: returns (theme, confidence) pairs from text"""
-        # In production: integrate author profiles, genre generalities, arc mapping
-        common_themes = {
-            "sacrifice": 0.92,
-            "irony": 0.88,
-            "poverty": 0.65,
-            "biblical_allusion": 0.80,
-            "love": 0.75,
-            "gender_roles": 0.50
+class LiteraryAuditor:
+    """Real-ish: keyword + motif pattern matcher for common literary themes."""
+    def __init__(self):
+        # Simple keyword sets (expandable)
+        self.theme_keywords = {
+            "sacrifice": ["sacrifice", "gave up", "sold", "offered", "treasures"],
+            "irony": ["stared", "useless", "futile", "irony", "twist"],
+            "poverty": ["poor", "meager", "$", "flat", "wages"],
+            "biblical_allusion": ["magi", "wise", "gift", "sheba", "solomon"],
+            "love": ["love", "devotion", "embrace", "heart"],
+            "gender_roles": ["pride", "provider", "she", "he"]
         }
-        # Filter to those with some evidence
-        detected = [(t, c) for t, c in common_themes.items() if "sacrifice" in text.lower() or "gift" in text.lower()]
-        return detected or [("unknown", 0.1)]
+    
+    def detect_themes(self, text: str) -> List[Tuple[str, float]]:
+        lower_text = text.lower()
+        detected = []
+        for theme, keywords in self.theme_keywords.items():
+            matches = sum(lower_text.count(k) for k in keywords)
+            conf = min(1.0, matches / max(1, len(lower_text.split()) / 50))
+            if conf > 0.2:  # loose threshold
+                detected.append((theme, conf))
+        return sorted(detected, key=lambda x: x[1], reverse=True) or [("unknown", 0.1)]
 
 
 class ThemeAnalysisTool:
-    """
-    Analyzes input text to extract themes with confidence scores.
-    
-    Combines generality (chain replication) and literary (motif/arc) checks.
-    Outputs a dict suitable for PriorityVector initialization.
-    """
-    
     def __init__(self):
-        self.generality_auditor = MockGeneralityAuditor()  # Replace with real in prod
-        self.literary_auditor = MockLiteraryAuditor()      # Replace with real in prod
-        self.min_confidence_threshold = 0.4
+        self.generality_auditor = GeneralityAuditor()
+        self.literary_auditor = LiteraryAuditor()
+        self.min_confidence_threshold = 0.3  # lowered slightly for realism
     
     def analyze(self, text: str) -> Dict[str, float]:
-        """
-        Run full theme detection on input text.
-        
-        Returns:
-            Dict[theme_name: confidence_score] — ready for PriorityVector
-        """
         if not text.strip():
             raise ValueError("Input text cannot be empty")
             
-        # Step 1: Literary detection (motifs, arcs, allusions)
         literary_results = self.literary_auditor.detect_themes(text)
         
-        # Step 2: Generality validation (chain replication, motif strength)
         theme_confidences: Dict[str, float] = {}
         for theme, lit_conf in literary_results:
-            # Score how well the theme replicates in chains
             replication_prob = self.generality_auditor.score_chain_replication(text, theme)
-            
-            # Combine: weighted average (literary confidence + replication)
-            combined_conf = 0.6 * lit_conf + 0.4 * replication_prob
-            
+            combined_conf = 0.55 * lit_conf + 0.45 * replication_prob
             if combined_conf >= self.min_confidence_threshold:
-                theme_confidences[theme] = combined_conf
+                theme_confidences[theme] = round(combined_conf, 3)
         
-        # Step 3: Fallback if no themes meet threshold
-        if not theme_confidences:
-            theme_confidences["default"] = 0.5  # minimal safe fallback
-        
-        return theme_confidences
+        return theme_confidences or {"default": 0.5}
     
     def get_key_motifs(self, text: str, top_n: int = 5) -> List[str]:
-        """
-        Extract frequent motifs/words for debugging or generality checks.
-        """
         words = re.findall(r'\b\w+\b', text.lower())
         common = Counter(words).most_common(top_n)
         return [word for word, _ in common]
 
 
-# Quick manual test block
+# Test block (optional — can be removed or kept)
 if __name__ == "__main__":
-    # Example text snippet (abridged Gift of the Magi)
-    sample_text = """
+    sample = """
     Della cried nearly all day, and into the night. She had only $1.87 to buy Jim a gift.
     Her hair was her pride, but she sold it for twenty dollars to buy a chain for his watch.
     When Jim came home, he stared at her short hair. His gift was combs for her long hair.
     They had sacrificed their treasures for each other.
     """
-    
     tool = ThemeAnalysisTool()
-    themes = tool.analyze(sample_text)
-    print("Detected themes with confidences:", themes)
-    
-    # Simulate feeding to PriorityVector (once we have it)
-    # from priority_vector import PriorityVector
-    # pv = PriorityVector(themes)
-    # print(pv)
+    print(tool.analyze(sample))
