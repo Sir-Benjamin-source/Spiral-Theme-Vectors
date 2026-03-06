@@ -3,16 +3,19 @@
 import sys
 import os
 
-# Get repo root (works whether run from root or examples/)
+# Force-add repo root's src/ (absolute Codespace path)
 REPO_ROOT = '/workspaces/Spiral-Theme-Vectors'
 sys.path.insert(0, os.path.join(REPO_ROOT, 'src'))
 
+# Verify path for debugging (remove later if you want)
+print("sys.path includes src?:", any('src' in p for p in sys.path))
+
 # Now imports
-from analysis_logger import AnalysisLogger
 from theme_analysis import ThemeAnalysisTool
 from priority_vector import PriorityVector
 from spiral_integration import SpiralRefinement
 from provenance import ProvenanceStamp
+from analysis_logger import AnalysisLogger  # add this if missing
 def run_test():
     print("=== Full Flow Test Started ===\n")
 
