@@ -5,7 +5,7 @@ AnalysisLogger: Records summaries, analyses, and refinements to JSON log.
 Enables the repo to accumulate examples for future reference, connections, and extension.
 """
 
-from typing import Dict, Any
+from typing import Dict, Any, Optional
 import json
 import os
 import time
@@ -34,7 +34,7 @@ class AnalysisLogger:
     def log_analysis(self, 
                      input_text: str, 
                      output: Dict[str, Any], 
-                     connections: List[str] = None, 
+                     connections: Optional[list[str]] = None, 
                      notes: str = "") -> None:
         """
         Append a new analysis entry to the log.
@@ -60,13 +60,13 @@ class AnalysisLogger:
             f.seek(0)
             json.dump(logs, f, indent=4)
     
-    def get_logs(self, limit: int = 10) -> List[Dict]:
+    def get_logs(self, limit: int = 10) -> list[Dict]:
         """Retrieve last N log entries."""
         with open(self.log_file, 'r') as f:
             logs = json.load(f)
         return logs[-limit:]
 
-    def search_logs(self, query: str) -> List[Dict]:
+    def search_logs(self, query: str) -> list[Dict]:
         """Simple keyword search on notes or input_snippet."""
         with open(self.log_file, 'r') as f:
             logs = json.load(f)
