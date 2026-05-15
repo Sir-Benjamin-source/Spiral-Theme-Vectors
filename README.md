@@ -1,30 +1,25 @@
 # Spiral-Theme-Vectors
 
-Controlled thematic emphasis and narrative differentiation for AI-assisted creative writing and comprehension tasks.
+**Literary Theory and Thematic Analysis Layer of the Spiral Codex**
 
-This module implements **grounded priority vectors** — a mechanism that allows users/agents to shift interpretive tone, sub-theme focus, and emphasis in generated or refined text while remaining strictly anchored to the source material. It is the direct software companion to the Zenodo preprint:
+Spiral-Theme-Vectors supports the structured exploration of themes, patterns, and conceptual vectors in literature and cultural works, enabling deep collaborative analysis between humans and AI.
 
-**Controlled Thematic Emphasis in Spiral-Assisted Creative Writing: Grounded Priority Vectors and Generality Constraints**  
-DOI: [10.5281/zenodo.18881454](https://zenodo.org/records/18881454)
+## Philosophy
 
-Built on Sir Benjamin's **Spiral Theory** and the **CreativeWriting_Assist** framework.
+Understanding complex cultural and literary works requires both human insight and systematic analysis. Spiral-Theme-Vectors helps facilitate that partnership while keeping human interpretive authority central.
 
-## Core Idea
+## Related Tools
 
-Traditional AI summarization and creative generation often converges on generic or consensus readings.  
-This module enables **controlled novelty**:  
-- Detects themes with confidence scores  
-- Generates a grounded default priority vector  
-- Accepts safe, bounded nudges  
-- Feeds emphasis into spiral refinement loops  
-- Produces differentiated yet text-faithful outputs with provenance stamps
+- [The Spiral Codex](https://github.com/Sir-Benjamin-source/The-Spiral-Codex)
 
-All variation stays within textual evidence (replicated word chains, motif validity, generality probability pools). No hallucinated themes or unsupported lenses.
+## Zenodo / DOI
 
-## Examples & Demos
+All Spiral Codex works are published with DOIs on Zenodo under Sir Benjamin (Stephen Benjamin Friend).
 
-Run these from the repo root to see the full flow in action:
+## License
 
-- Literary (Magi story):
-  ```bash
-  python examples/full_flow_demo.py
+MIT + Spiral Mark
+
+---
+
+*Part of the Spiral Codex — building reliable human-AI partnership.*
